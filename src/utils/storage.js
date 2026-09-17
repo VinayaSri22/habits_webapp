@@ -1,14 +1,14 @@
 const STORAGE_KEY = 'loop-habits:v1'
 const APP_VERSION = 1
 
-export const THEME_OPTIONS = ['system', 'light', 'dark']
+export const THEME_OPTIONS = ['light', 'dark']
 
 export function defaultAppData() {
   return {
     version: APP_VERSION,
     habits: [],
     settings: {
-      theme: 'system',
+      theme: 'light',
       skipEnabled: true,
       questionMarksEnabled: true,
     },
@@ -47,8 +47,13 @@ function migrateAppData(data) {
     settings: {
       ...defaults.settings,
       ...(data.settings && typeof data.settings === 'object' ? data.settings : {}),
+      theme: normalizeTheme(data.settings?.theme),
     },
   }
+}
+
+function normalizeTheme(theme) {
+  return theme === 'dark' ? 'dark' : 'light'
 }
 
 function normalizeHabitRecord(habit) {
@@ -61,11 +66,7 @@ function normalizeHabitRecord(habit) {
 
 export function applyTheme(theme) {
   const root = document.documentElement
-  if (theme === 'light' || theme === 'dark') {
-    root.dataset.theme = theme
-  } else {
-    delete root.dataset.theme
-  }
+  root.dataset.theme = normalizeTheme(theme)
 }
 
 export { STORAGE_KEY, APP_VERSION }

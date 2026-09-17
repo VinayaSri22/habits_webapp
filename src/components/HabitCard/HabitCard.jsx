@@ -75,6 +75,7 @@ export function HabitCard({
   onOpen,
   onMoveUp,
   onMoveDown,
+  onArchive,
   onDragStart,
 }) {
   const color = getHabitColor(habit.colorIndex).hex
@@ -118,7 +119,7 @@ export function HabitCard({
           <button
             key={date}
             type="button"
-            className={`day-slot check-button${index < 2 ? ' is-optional' : ''}`}
+            className={`day-slot check-button${index < 2 ? ' is-optional' : ''}${index < 4 ? ' is-mobile-optional' : ''}`}
             aria-label={`${habit.name}, ${heading.full}: ${stateName(value, isNumerical)}`}
             onClick={() => (isNumerical ? onOpenNumber(date, value) : onToggle(date))}
           >
@@ -133,13 +134,18 @@ export function HabitCard({
         )
       })}
 
-      <div className="habit-move">
-        <button type="button" className="icon-button" disabled={!canMoveUp} onClick={onMoveUp} aria-label="Move up">
-          ↑
+      <div className="habit-actions">
+        <button type="button" className="archive-button" onClick={onArchive} aria-label={`Archive ${habit.name}`}>
+          Archive
         </button>
-        <button type="button" className="icon-button" disabled={!canMoveDown} onClick={onMoveDown} aria-label="Move down">
-          ↓
-        </button>
+        <div className="habit-move">
+          <button type="button" className="icon-button" disabled={!canMoveUp} onClick={onMoveUp} aria-label="Move up">
+            ↑
+          </button>
+          <button type="button" className="icon-button" disabled={!canMoveDown} onClick={onMoveDown} aria-label="Move down">
+            ↓
+          </button>
+        </div>
       </div>
     </article>
   )

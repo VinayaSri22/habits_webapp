@@ -71,6 +71,14 @@ function reducer(state, action) {
     case 'PATCH_SETTINGS': {
       return { ...state, settings: { ...state.settings, ...action.patch } }
     }
+    case 'ARCHIVE_HABIT': {
+      return {
+        ...state,
+        habits: state.habits.map((habit) =>
+          habit.id === action.id ? { ...habit, isArchived: action.isArchived } : habit,
+        ),
+      }
+    }
     case 'REPLACE_HABITS': {
       return { ...state, habits: action.habits }
     }
@@ -105,6 +113,8 @@ export function HabitProvider({ children }) {
       setEntry: (id, date, value, notes) => dispatch({ type: 'SET_ENTRY', id, date, value, notes }),
       toggleEntry: (id, date) => dispatch({ type: 'TOGGLE_ENTRY', id, date }),
       reorderHabits: (ids) => dispatch({ type: 'REORDER_HABITS', ids }),
+      archiveHabit: (id) => dispatch({ type: 'ARCHIVE_HABIT', id, isArchived: true }),
+      unarchiveHabit: (id) => dispatch({ type: 'ARCHIVE_HABIT', id, isArchived: false }),
       setTheme: (theme) => dispatch({ type: 'SET_THEME', theme }),
       patchSettings: (patch) => dispatch({ type: 'PATCH_SETTINGS', patch }),
       replaceHabits: (habits) => dispatch({ type: 'REPLACE_HABITS', habits }),
