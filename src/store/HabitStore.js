@@ -71,6 +71,17 @@ function reducer(state, action) {
     case 'PATCH_SETTINGS': {
       return { ...state, settings: { ...state.settings, ...action.patch } }
     }
+    case 'REPLACE_HABITS': {
+      return { ...state, habits: action.habits }
+    }
+    case 'MERGE_HABITS': {
+      const offset = nextPosition(state.habits)
+      const incoming = action.habits.map((habit, index) => ({
+        ...habit,
+        position: offset + index,
+      }))
+      return { ...state, habits: [...state.habits, ...incoming] }
+    }
     default:
       return state
   }
@@ -96,6 +107,8 @@ export function HabitProvider({ children }) {
       reorderHabits: (ids) => dispatch({ type: 'REORDER_HABITS', ids }),
       setTheme: (theme) => dispatch({ type: 'SET_THEME', theme }),
       patchSettings: (patch) => dispatch({ type: 'PATCH_SETTINGS', patch }),
+      replaceHabits: (habits) => dispatch({ type: 'REPLACE_HABITS', habits }),
+      mergeHabits: (habits) => dispatch({ type: 'MERGE_HABITS', habits }),
     }),
     [state],
   )

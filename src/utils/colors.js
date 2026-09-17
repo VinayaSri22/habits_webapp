@@ -35,3 +35,22 @@ export function withAlpha(hex, alpha) {
   const b = Number.parseInt(normalized.slice(4, 6), 16)
   return `rgba(${r}, ${g}, ${b}, ${alpha})`
 }
+
+/** Black or white, whichever reads better on the given background. */
+export function readableTextOn(hex) {
+  const normalized = hex.replace('#', '')
+  const channels = [0, 2, 4].map((offset) => {
+    const value = Number.parseInt(normalized.slice(offset, offset + 2), 16) / 255
+    return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4
+  })
+  const luminance = 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2]
+  // 0.179 is where white and black text have equal WCAG contrast.
+  return luminance > 0.179 ? '#1a1c1e' : '#ffffff'
+}
+
+export function colorIndexFromHex(hex) {
+  if (!hex) return DEFAULT_HABIT_COLOR
+  const normalized = hex.trim().toUpperCase()
+  const match = HABIT_COLORS.find((color) => color.hex.toUpperCase() === normalized)
+  return match?.index ?? DEFAULT_HABIT_COLOR
+}

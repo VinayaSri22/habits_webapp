@@ -167,7 +167,7 @@ npm run build
 ### Phase 4 — Polish
 - [ ] Dark mode / Light mode toggle
 - [ ] Archive/Unarchive habits
-- [ ] CSV data export & import (matching Loop's format)
+- [x] CSV data export & import (matching Loop's format)
 - [ ] Responsive mobile layout
 - [ ] PWA manifest & service worker
 

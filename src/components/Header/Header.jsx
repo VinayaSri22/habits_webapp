@@ -1,7 +1,17 @@
+import { useRef } from 'react'
 import { THEME_CHOICES } from './themeChoices.js'
 import './Header.css'
 
-export function Header({ theme, onThemeChange, onAddHabit, showAdd = true }) {
+export function Header({
+  theme,
+  onThemeChange,
+  onAddHabit,
+  showAdd = true,
+  onImportFile,
+  onExport,
+}) {
+  const fileRef = useRef(null)
+
   return (
     <header className="app-header">
       <div className="brand">
@@ -26,6 +36,23 @@ export function Header({ theme, onThemeChange, onAddHabit, showAdd = true }) {
             </button>
           ))}
         </div>
+        <button type="button" className="btn btn-ghost" onClick={onExport}>
+          Export CSV
+        </button>
+        <button type="button" className="btn btn-ghost" onClick={() => fileRef.current?.click()}>
+          Import CSV
+        </button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".zip,application/zip"
+          hidden
+          onChange={(event) => {
+            const file = event.target.files?.[0]
+            event.target.value = ''
+            if (file) onImportFile(file)
+          }}
+        />
         {showAdd ? (
           <button type="button" className="btn btn-primary add-habit" onClick={onAddHabit}>
             Add habit

@@ -1,6 +1,6 @@
-import { NO, SKIP, UNKNOWN, YES_AUTO, YES_MANUAL, fromMillivalue } from '../models/Entry.js'
+import { SKIP, UNKNOWN, YES_AUTO, YES_MANUAL, fromMillivalue } from '../models/Entry.js'
 import { HabitType, NumericalHabitType } from '../models/types.js'
-import { addDays, mondayIndex, startOfWeekMonday, todayKey } from './dateUtils.js'
+import { addDays, daysBetween, mondayIndex, startOfWeekMonday, todayKey } from './dateUtils.js'
 
 export function isSuccessfulEntry(habit, value) {
   if (habit.type === HabitType.NUMERICAL) {
@@ -18,19 +18,42 @@ export function isManualCompletion(habit, value) {
   return value === YES_MANUAL
 }
 
-export function heatmapIntensity(habit, value) {
-  if (value === UNKNOWN) return 0
-  if (value === SKIP) return 0.15
+export const HistorySquare = {
+  ON: 'on',
+  OFF: 'off',
+  GREY: 'grey',
+  DIMMED: 'dimmed',
+  HATCHED: 'hatched',
+}
+
+/**
+ * Square state for the calendar history, matching Loop's HistoryCard.
+ * Numerical habits use GREY for days with some progress but below target.
+ */
+export function historySquare(habit, value) {
   if (habit.type === HabitType.NUMERICAL) {
-    if (habit.targetValue > 0) {
-      return Math.min(1, Math.max(0.12, fromMillivalue(Math.max(value, 0)) / habit.targetValue))
-    }
-    return value > 0 ? 1 : 0.12
+    if (value === UNKNOWN) return HistorySquare.OFF
+    if (value === SKIP) return HistorySquare.HATCHED
+    return isSuccessfulEntry(habit, value) ? HistorySquare.ON : HistorySquare.GREY
   }
-  if (value === YES_MANUAL) return 1
-  if (value === YES_AUTO) return 0.45
-  if (value === NO) return 0.22
-  return 0
+
+  if (value === YES_MANUAL) return HistorySquare.ON
+  if (value === YES_AUTO) return HistorySquare.DIMMED
+  if (value === SKIP) return HistorySquare.HATCHED
+  return HistorySquare.OFF
+}
+
+export function describeSquare(habit, value) {
+  if (value === UNKNOWN) return 'no data'
+  if (value === SKIP) return 'skipped'
+  if (habit.type === HabitType.NUMERICAL) {
+    const amount = fromMillivalue(value)
+    const unit = habit.unit ? ` ${habit.unit}` : ''
+    return `${Number(amount.toFixed(2))}${unit}`
+  }
+  if (value === YES_MANUAL) return 'completed'
+  if (value === YES_AUTO) return 'completed automatically'
+  return 'missed'
 }
 
 export function countCompletions(habit, computedEntries) {
@@ -50,11 +73,22 @@ export function weekdayCompletionCounts(habit, computedEntries, fromDate, toDate
   return counts
 }
 
-export function buildHeatmapWeeks(weekCount, endKey = todayKey()) {
-  const thisMonday = startOfWeekMonday(endKey)
-  const startMonday = addDays(thisMonday, -(weekCount - 1) * 7)
-  return Array.from({ length: weekCount }, (_, week) => {
-    const weekStart = addDays(startMonday, week * 7)
+/** Number of Monday-start weeks spanned by [fromDate, toDate], inclusive. */
+export function countWeeksBetween(fromDate, toDate) {
+  const span = daysBetween(startOfWeekMonday(fromDate), startOfWeekMonday(toDate))
+  return Math.floor(span / 7) + 1
+}
+
+/**
+ * `columns` week columns (oldest first), each 7 days starting Monday.
+ * The newest column is `weekOffset` weeks before the week containing `endKey`.
+ */
+export function buildWeekColumns({ columns, endKey = todayKey(), weekOffset = 0 }) {
+  const lastMonday = addDays(startOfWeekMonday(endKey), -weekOffset * 7)
+  const firstMonday = addDays(lastMonday, -(columns - 1) * 7)
+
+  return Array.from({ length: columns }, (_, week) => {
+    const weekStart = addDays(firstMonday, week * 7)
     return Array.from({ length: 7 }, (_, day) => addDays(weekStart, day))
   })
 }

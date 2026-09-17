@@ -3,7 +3,6 @@ import { NumberEntryModal } from '../common/NumberEntryModal.jsx'
 import { describeFrequency } from '../../models/Frequency.js'
 import { getHabitSnapshot, HabitType } from '../../models/Habit.js'
 import {
-  buildHeatmapWeeks,
   countCompletions,
   firstKnownDate,
   scoreSeries,
@@ -39,7 +38,6 @@ export function HabitDetail({ habit, onBack, onEdit, onToggle, onSetEntry }) {
     () => scoreSeries(snapshot.scores, fromDate > today ? today : fromDate, today),
     [snapshot.scores, fromDate, today],
   )
-  const weeks = useMemo(() => buildHeatmapWeeks(20, today), [today])
   const weekdayCounts = weekdayCompletionCounts(habit, snapshot.computedEntries, fromDate, today)
   const completions = countCompletions(habit, snapshot.computedEntries)
 
@@ -109,10 +107,11 @@ export function HabitDetail({ habit, onBack, onEdit, onToggle, onSetEntry }) {
           <p>Tap a day to check in</p>
         </div>
         <CalendarHeatmap
-          weeks={weeks}
+          key={habit.id}
           habit={habit}
           computedEntries={snapshot.computedEntries}
           color={color}
+          oldestDate={knownFrom}
           onDayClick={handleDay}
         />
       </section>
