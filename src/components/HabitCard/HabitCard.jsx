@@ -72,7 +72,7 @@ export function HabitCard({
   canMoveDown,
   onToggle,
   onOpenNumber,
-  onEdit,
+  onOpen,
   onMoveUp,
   onMoveDown,
   onDragStart,
@@ -97,7 +97,7 @@ export function HabitCard({
       </button>
 
       <div className="habit-meta">
-        <button type="button" className="habit-name" onClick={onEdit}>
+        <button type="button" className="habit-name" onClick={onOpen}>
           <span className="habit-pip" style={{ background: color }} />
           {habit.name}
         </button>

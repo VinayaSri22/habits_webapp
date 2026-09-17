@@ -1,7 +1,7 @@
 import { THEME_CHOICES } from './themeChoices.js'
 import './Header.css'
 
-export function Header({ theme, onThemeChange, onAddHabit }) {
+export function Header({ theme, onThemeChange, onAddHabit, showAdd = true }) {
   return (
     <header className="app-header">
       <div className="brand">
@@ -26,9 +26,11 @@ export function Header({ theme, onThemeChange, onAddHabit }) {
             </button>
           ))}
         </div>
-        <button type="button" className="btn btn-primary add-habit" onClick={onAddHabit}>
-          Add habit
-        </button>
+        {showAdd ? (
+          <button type="button" className="btn btn-primary add-habit" onClick={onAddHabit}>
+            Add habit
+          </button>
+        ) : null}
       </div>
     </header>
   )

@@ -7,7 +7,7 @@ import './HabitList.css'
 
 const VISIBLE_DAYS = 7
 
-export function HabitList({ habits, onToggle, onSetEntry, onEdit, onReorder }) {
+export function HabitList({ habits, onToggle, onSetEntry, onOpen, onReorder }) {
   const dates = dateRangeEndingOn(VISIBLE_DAYS)
   const [dragId, setDragId] = useState(null)
   const [numberTarget, setNumberTarget] = useState(null)
@@ -73,7 +73,7 @@ export function HabitList({ habits, onToggle, onSetEntry, onEdit, onReorder }) {
           canMoveDown={index < ordered.length - 1}
           onToggle={(date) => onToggle(habit.id, date)}
           onOpenNumber={(date, value) => setNumberTarget({ habit, date, value })}
-          onEdit={() => onEdit(habit)}
+          onOpen={() => onOpen(habit)}
           onMoveUp={() => move(index, index - 1)}
           onMoveDown={() => move(index, index + 1)}
           onDragStart={(event) => {

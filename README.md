@@ -157,12 +157,12 @@ npm run build
 - [x] Numerical habit value entry
 - [x] Habit reordering (drag or manual)
 
-### Phase 3 — Analytics
-- [ ] Habit detail view
-- [ ] Score line chart (SVG)
-- [ ] Calendar heatmap
-- [ ] Streak statistics
-- [ ] Day-of-week frequency chart
+### Phase 3 — Analytics ✅
+- [x] Habit detail view
+- [x] Score line chart (SVG)
+- [x] Calendar heatmap
+- [x] Streak statistics
+- [x] Day-of-week frequency chart
 
 ### Phase 4 — Polish
 - [ ] Dark mode / Light mode toggle

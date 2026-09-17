@@ -68,3 +68,38 @@ export function formatDayHeading(dateKey) {
     }),
   }
 }
+
+export function formatShortDate(dateKey) {
+  return parseDateKey(dateKey).toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
+export function formatMonthYear(dateKey) {
+  return parseDateKey(dateKey).toLocaleDateString(undefined, {
+    month: 'short',
+    year: 'numeric',
+  })
+}
+
+/** Monday-start week containing `dateKey`. */
+export function startOfWeekMonday(dateKey) {
+  const date = parseDateKey(dateKey)
+  const offset = (date.getDay() + 6) % 7
+  date.setDate(date.getDate() - offset)
+  return toDateKey(date)
+}
+
+export function mondayIndex(dateKey) {
+  return (weekdayIndex(dateKey) + 6) % 7
+}
+
+export function weekdayLabelsMondayFirst() {
+  const monday = parseDateKey('2026-01-05')
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(monday)
+    date.setDate(monday.getDate() + index)
+    return date.toLocaleDateString(undefined, { weekday: 'short' })
+  })
+}

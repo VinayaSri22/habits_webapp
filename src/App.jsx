@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react'
 import { Header } from './components/Header/Header.jsx'
+import { HabitDetail } from './components/HabitDetail/HabitDetail.jsx'
 import { HabitForm } from './components/HabitForm/HabitForm.jsx'
 import { HabitList } from './components/HabitList/HabitList.jsx'
 import { HabitProvider, useHabits } from './store/HabitStore.js'
@@ -12,6 +13,7 @@ function AppShell() {
     useHabits()
   const [formOpen, setFormOpen] = useState(false)
   const [editingHabit, setEditingHabit] = useState(null)
+  const [selectedId, setSelectedId] = useState(null)
 
   const closeForm = useCallback(() => {
     setFormOpen(false)
@@ -19,12 +21,14 @@ function AppShell() {
   }, [])
 
   const visibleHabits = habits.filter((habit) => !habit.isArchived)
+  const selectedHabit = habits.find((habit) => habit.id === selectedId) ?? null
 
   return (
     <div className="app">
       <Header
         theme={settings.theme}
         onThemeChange={setTheme}
+        showAdd={!selectedHabit}
         onAddHabit={() => {
           setEditingHabit(null)
           setFormOpen(true)
@@ -32,7 +36,18 @@ function AppShell() {
       />
 
       <main className="app-main">
-        {visibleHabits.length === 0 ? (
+        {selectedHabit ? (
+          <HabitDetail
+            habit={selectedHabit}
+            onBack={() => setSelectedId(null)}
+            onEdit={() => {
+              setEditingHabit(selectedHabit)
+              setFormOpen(true)
+            }}
+            onToggle={toggleEntry}
+            onSetEntry={setEntry}
+          />
+        ) : visibleHabits.length === 0 ? (
           <section className="empty-state">
             <h2>No habits yet</h2>
             <p>Create a habit, then tap the last few days to check in. Everything stays on this device.</p>
@@ -57,10 +72,7 @@ function AppShell() {
             habits={habits}
             onToggle={toggleEntry}
             onSetEntry={setEntry}
-            onEdit={(habit) => {
-              setEditingHabit(habit)
-              setFormOpen(true)
-            }}
+            onOpen={(habit) => setSelectedId(habit.id)}
             onReorder={reorderHabits}
           />
         )}
@@ -81,6 +93,7 @@ function AppShell() {
         onDelete={(id) => {
           deleteHabit(id)
           closeForm()
+          if (selectedId === id) setSelectedId(null)
         }}
       />
     </div>
