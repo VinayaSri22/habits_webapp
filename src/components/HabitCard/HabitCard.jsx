@@ -135,9 +135,9 @@ export function HabitCard({
       })}
 
       <div className="habit-actions">
-        <button type="button" className="archive-button" onClick={onArchive} aria-label={`Archive ${habit.name}`}>
+        {/* <button type="button" className="archive-button" onClick={onArchive} aria-label={`Archive ${habit.name}`}>
           Archive
-        </button>
+        </button> */}
         <div className="habit-move">
           <button type="button" className="icon-button" disabled={!canMoveUp} onClick={onMoveUp} aria-label="Move up">
             ↑

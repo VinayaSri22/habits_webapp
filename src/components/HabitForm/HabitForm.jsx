@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ColorPicker } from '../common/ColorPicker.jsx'
+import { ConfirmDialog } from '../common/ConfirmDialog.jsx'
 import { Modal } from '../common/Modal.jsx'
 import { createFrequency } from '../../models/Frequency.js'
 import { HabitType, NumericalHabitType } from '../../models/types.js'
@@ -76,6 +77,7 @@ export function HabitForm({ open, habit, onClose, onSave, onDelete }) {
 
 function HabitFormFields({ habit, onClose, onSave, onDelete }) {
   const [form, setForm] = useState(() => (habit ? habitToForm(habit) : blankForm()))
+  const [deleteOpen, setDeleteOpen] = useState(false)
   const isEdit = Boolean(habit)
 
   function update(patch) {
@@ -103,6 +105,7 @@ function HabitFormFields({ habit, onClose, onSave, onDelete }) {
   }
 
   return (
+    <>
     <Modal
       open
       onClose={onClose}
@@ -113,11 +116,7 @@ function HabitFormFields({ habit, onClose, onSave, onDelete }) {
             <button
               type="button"
               className="btn btn-danger"
-              onClick={() => {
-                if (window.confirm(`Delete “${habit.name}”? This cannot be undone.`)) {
-                  onDelete(habit.id)
-                }
-              }}
+              onClick={() => setDeleteOpen(true)}
             >
               Delete
             </button>
@@ -282,5 +281,28 @@ function HabitFormFields({ habit, onClose, onSave, onDelete }) {
         </label>
       </form>
     </Modal>
+
+    <ConfirmDialog
+      open={deleteOpen}
+      title="Delete habit?"
+      message={`“${habit?.name}” and all of its check-in history will be permanently removed. This cannot be undone.`}
+      onClose={() => setDeleteOpen(false)}
+      actions={[
+        {
+          label: 'Delete',
+          variant: 'danger',
+          onClick: () => {
+            onDelete(habit.id)
+            setDeleteOpen(false)
+          },
+        },
+        {
+          label: 'Cancel',
+          variant: 'ghost',
+          onClick: () => setDeleteOpen(false),
+        },
+      ]}
+    />
+    </>
   )
 }

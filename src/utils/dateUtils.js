@@ -59,7 +59,7 @@ export function dateRangeEndingOn(count, endKey = todayKey()) {
 export function formatDayHeading(dateKey) {
   const date = parseDateKey(dateKey)
   return {
-    weekday: date.toLocaleDateString(undefined, { weekday: 'narrow' }),
+    weekday: date.toLocaleDateString(undefined, { weekday: 'short' }).toUpperCase(),
     day: String(date.getDate()),
     full: date.toLocaleDateString(undefined, {
       weekday: 'long',

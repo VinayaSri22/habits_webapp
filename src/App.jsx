@@ -1,4 +1,5 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { ConfirmDialog } from './components/common/ConfirmDialog.jsx'
 import { Header } from './components/Header/Header.jsx'
 import { HabitDetail } from './components/HabitDetail/HabitDetail.jsx'
 import { HabitForm } from './components/HabitForm/HabitForm.jsx'
@@ -31,6 +32,15 @@ function AppShell() {
   const [selectedId, setSelectedId] = useState(null)
   const [showArchived, setShowArchived] = useState(false)
   const [status, setStatus] = useState(null)
+  const [importChoice, setImportChoice] = useState(null)
+
+  useEffect(() => {
+    if (!status) return undefined
+    const timer = setTimeout(() => {
+      setStatus(null)
+    }, 3500)
+    return () => clearTimeout(timer)
+  }, [status])
 
   const closeForm = useCallback(() => {
     setFormOpen(false)
@@ -50,20 +60,14 @@ function AppShell() {
         return
       }
 
-      const replace =
-        forceReplace ||
-        habits.length === 0 ||
-        window.confirm(
-          `Import ${imported.length} habit${imported.length === 1 ? '' : 's'} from Loop CSV?\n\nOK replaces your current habits.\nCancel adds them alongside.`,
-        )
-
-      if (replace) {
+      if (forceReplace || habits.length === 0) {
         replaceHabits(imported)
         setSelectedId(null)
-      } else {
-        mergeHabits(imported)
+        setStatus(`Imported ${imported.length} habit${imported.length === 1 ? '' : 's'}.`)
+        return
       }
-      setStatus(`Imported ${imported.length} habit${imported.length === 1 ? '' : 's'}.`)
+
+      setImportChoice({ imported, count: imported.length })
     } catch (error) {
       setStatus(error instanceof Error ? error.message : 'Could not import that file.')
     }
@@ -90,12 +94,12 @@ function AppShell() {
       />
 
       {status ? (
-        <p className="app-status" role="status">
-          {status}
-          <button type="button" className="icon-button" aria-label="Dismiss" onClick={() => setStatus(null)}>
-            ×
-          </button>
-        </p>
+        <div className="toast-container" role="status" aria-live="polite">
+          <div className="app-toast" onClick={() => setStatus(null)} title="Click to dismiss">
+            <span className="toast-dot" aria-hidden="true" />
+            <span className="toast-message">{status}</span>
+          </div>
+        </div>
       ) : null}
 
       <main className="app-main">
@@ -198,6 +202,43 @@ function AppShell() {
           closeForm()
           if (selectedId === id) setSelectedId(null)
         }}
+      />
+
+      <ConfirmDialog
+        open={Boolean(importChoice)}
+        title="Import habits"
+        message={
+          importChoice
+            ? `Found ${importChoice.count} habit${importChoice.count === 1 ? '' : 's'} in this file.\n\nReplace your current habits, or add the imported ones alongside them?`
+            : ''
+        }
+        onClose={() => setImportChoice(null)}
+        actions={[
+          {
+            label: 'Replace all',
+            variant: 'danger',
+            onClick: () => {
+              replaceHabits(importChoice.imported)
+              setSelectedId(null)
+              setStatus(`Imported ${importChoice.count} habit${importChoice.count === 1 ? '' : 's'}.`)
+              setImportChoice(null)
+            },
+          },
+          {
+            label: 'Add alongside',
+            variant: 'primary',
+            onClick: () => {
+              mergeHabits(importChoice.imported)
+              setStatus(`Imported ${importChoice.count} habit${importChoice.count === 1 ? '' : 's'}.`)
+              setImportChoice(null)
+            },
+          },
+          {
+            label: 'Cancel',
+            variant: 'ghost',
+            onClick: () => setImportChoice(null),
+          },
+        ]}
       />
     </div>
   )

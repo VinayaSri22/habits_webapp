@@ -5,7 +5,7 @@
 
 .habit-grid {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1.4fr) 3.4rem repeat(7, 2.35rem) 4.7rem;
+  grid-template-columns: 28px minmax(0, 1.4fr) 3.4rem repeat(7, 2.35rem) 28px;
   align-items: center;
   column-gap: 2px;
 }
@@ -32,6 +32,12 @@
   display: grid;
   justify-items: center;
   line-height: 1.15;
+}
+
+.day-heading span {
+  font-size: 0.65rem;
+  letter-spacing: 0.02em;
+  font-weight: var(--weight-medium);
 }
 
 .day-heading.today strong {
@@ -128,7 +134,7 @@
 
 @media (max-width: 760px) {
   .habit-grid {
-    grid-template-columns: 24px minmax(0, 1.2fr) 2.8rem repeat(5, 2.1rem) 4.1rem;
+    grid-template-columns: 24px minmax(0, 1.2fr) 2.8rem repeat(5, 2.1rem) 24px;
   }
 
   .day-slot.is-optional {
@@ -138,7 +144,7 @@
 
 @media (max-width: 520px) {
   .habit-grid {
-    grid-template-columns: minmax(0, 1fr) 2.6rem repeat(3, 2rem) 3.9rem;
+    grid-template-columns: minmax(0, 1fr) 2.6rem repeat(3, 2rem) 24px;
   }
 
   .habit-grid > .drag-handle,
