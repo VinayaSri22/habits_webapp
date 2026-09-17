@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './Header.css'
 
 export function Header({
@@ -10,8 +10,30 @@ export function Header({
   onExport,
 }) {
   const fileRef = useRef(null)
+  const menuRef = useRef(null)
+  const [menuOpen, setMenuOpen] = useState(false)
   const isDark = theme === 'dark'
   const nextTheme = isDark ? 'light' : 'dark'
+
+  useEffect(() => {
+    if (!menuOpen) return undefined
+
+    function onPointerDown(event) {
+      if (!menuRef.current?.contains(event.target)) setMenuOpen(false)
+    }
+
+    function onKeyDown(event) {
+      if (event.key === 'Escape') setMenuOpen(false)
+    }
+
+    document.addEventListener('pointerdown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [menuOpen])
 
   return (
     <header className="app-header">
@@ -25,9 +47,16 @@ export function Header({
         </div>
       </div>
       <div className="header-actions">
+        {showAdd ? (
+          <button type="button" className="header-icon-button add-habit" onClick={onAddHabit} aria-label="Add habit">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="2" />
+            </svg>
+          </button>
+        ) : null}
         <button
           type="button"
-          className="theme-toggle"
+          className="header-icon-button theme-toggle"
           aria-pressed={isDark}
           aria-label={`Switch to ${nextTheme} mode`}
           title={`Switch to ${nextTheme} mode`}
@@ -56,12 +85,54 @@ export function Header({
             </svg>
           )}
         </button>
-        <button type="button" className="btn btn-ghost" onClick={onExport}>
-          Export CSV
-        </button>
-        <button type="button" className="btn btn-ghost" onClick={() => fileRef.current?.click()}>
-          Import CSV
-        </button>
+        <div className="overflow-menu" ref={menuRef}>
+          <button
+            type="button"
+            className="header-icon-button"
+            aria-label="Import and export"
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((current) => !current)}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="5" r="1.8" fill="currentColor" />
+              <circle cx="12" cy="12" r="1.8" fill="currentColor" />
+              <circle cx="12" cy="19" r="1.8" fill="currentColor" />
+            </svg>
+          </button>
+          {menuOpen ? (
+            <div className="header-menu" role="menu">
+              <p>Import</p>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setMenuOpen(false)
+                  fileRef.current?.click()
+                }}
+              >
+                CSV
+              </button>
+              <button type="button" role="menuitem" disabled>
+                DB <span>Coming soon</span>
+              </button>
+              <p>Export</p>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setMenuOpen(false)
+                  onExport()
+                }}
+              >
+                CSV
+              </button>
+              <button type="button" role="menuitem" disabled>
+                DB <span>Coming soon</span>
+              </button>
+            </div>
+          ) : null}
+        </div>
         <input
           ref={fileRef}
           type="file"
@@ -73,11 +144,6 @@ export function Header({
             if (file) onImportFile(file)
           }}
         />
-        {showAdd ? (
-          <button type="button" className="btn btn-primary add-habit" onClick={onAddHabit}>
-            Add habit
-          </button>
-        ) : null}
       </div>
     </header>
   )

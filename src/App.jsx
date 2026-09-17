@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Header } from './components/Header/Header.jsx'
 import { HabitDetail } from './components/HabitDetail/HabitDetail.jsx'
 import { HabitForm } from './components/HabitForm/HabitForm.jsx'
@@ -31,7 +31,6 @@ function AppShell() {
   const [selectedId, setSelectedId] = useState(null)
   const [showArchived, setShowArchived] = useState(false)
   const [status, setStatus] = useState(null)
-  const emptyImportRef = useRef(null)
 
   const closeForm = useCallback(() => {
     setFormOpen(false)
@@ -144,20 +143,6 @@ function AppShell() {
               >
                 Add your first habit
               </button>
-              <button type="button" className="btn btn-ghost" onClick={() => emptyImportRef.current?.click()}>
-                Import Loop CSV
-              </button>
-              <input
-                ref={emptyImportRef}
-                type="file"
-                accept=".zip,application/zip"
-                hidden
-                onChange={(event) => {
-                  const file = event.target.files?.[0]
-                  event.target.value = ''
-                  if (file) handleImportFile(file, { forceReplace: true })
-                }}
-              />
             </div>
             {archivedHabits.length > 0 ? (
               <div className="empty-archive-list">
