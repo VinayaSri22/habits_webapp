@@ -1,0 +1,14 @@
+.habit-form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.schedule-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-radius: var(--radius-md);
+}
+
+.schedule-grid button {
+  border-radius: var(--radius-sm);
+}

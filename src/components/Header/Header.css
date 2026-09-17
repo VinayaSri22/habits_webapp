@@ -1,0 +1,21 @@
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.add-habit {
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .app-header {
+    flex-wrap: wrap;
+  }
+
+  .add-habit {
+    padding-inline: 0.7rem;
+  }
+}
