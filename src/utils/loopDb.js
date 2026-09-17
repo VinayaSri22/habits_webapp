@@ -3,7 +3,7 @@ import { NO, SKIP, UNKNOWN, YES_AUTO, YES_MANUAL } from '../models/Entry.js'
 import { createFrequency } from '../models/Frequency.js'
 import { createHabit } from '../models/Habit.js'
 import { HabitType, NumericalHabitType } from '../models/types.js'
-import { toDateKey } from './dateUtils.js'
+import { parseDateKey, toDateKey } from './dateUtils.js'
 
 const DB_TRUE_VALUES = new Set([1, '1', true, 'true', 'TRUE'])
 
@@ -113,9 +113,148 @@ export function importLoopDbDatabase(db) {
   }))
 }
 
+function sqlWasmUrl() {
+  if (typeof window !== 'undefined') return '/sql-wasm.wasm'
+  return new URL('../../node_modules/sql.js/dist/sql-wasm.wasm', import.meta.url).href
+}
+
+function valueToLoopDb(value) {
+  switch (Number(value)) {
+    case NO:
+      return 0
+    case YES_AUTO:
+      return 1
+    case YES_MANUAL:
+      return 2
+    case SKIP:
+      return 3
+    default:
+      return 0
+  }
+}
+
+function dateKeyToTimestamp(dateKey) {
+  const parsed = parseDateKey(dateKey)
+  return parsed.getTime()
+}
+
+export async function exportLoopDbDatabase(habits) {
+  const SQL = await initSqlJs({
+    locateFile: () => sqlWasmUrl(),
+  })
+  const database = new SQL.Database()
+
+  database.run(`
+    CREATE TABLE Habits (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      archived INTEGER,
+      color INTEGER,
+      description TEXT,
+      freq_den INTEGER,
+      freq_num INTEGER,
+      highlight INTEGER,
+      name TEXT,
+      position INTEGER,
+      reminder_hour INTEGER,
+      reminder_min INTEGER,
+      reminder_days INTEGER,
+      type INTEGER,
+      target_type INTEGER,
+      target_value REAL,
+      unit TEXT,
+      question TEXT,
+      uuid TEXT
+    );
+  `)
+
+  database.run(`
+    CREATE TABLE Repetitions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      habit INTEGER NOT NULL,
+      timestamp INTEGER NOT NULL,
+      value INTEGER NOT NULL,
+      notes TEXT
+    );
+  `)
+
+  database.run(`
+    CREATE TABLE Events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      timestamp INTEGER,
+      message TEXT,
+      server_id INTEGER
+    );
+  `)
+
+  database.run('CREATE UNIQUE INDEX idx_repetitions_habit_timestamp ON Repetitions(habit, timestamp);')
+
+  const ordered = [...habits].sort((a, b) => Number(a.position ?? 0) - Number(b.position ?? 0))
+
+  const habitIds = new Map()
+  ordered.forEach((habit, index) => {
+    const id = index + 1
+    habitIds.set(habit.id ?? habit.uuid ?? index, id)
+
+    const isNumerical = habit.type === HabitType.NUMERICAL
+    database.run(
+      `INSERT INTO Habits (
+        id, archived, color, description, freq_den, freq_num, highlight, name,
+        position, reminder_hour, reminder_min, reminder_days, type, target_type,
+        target_value, unit, question, uuid
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+      [
+        id,
+        habit.isArchived ? 1 : 0,
+        Number(habit.colorIndex ?? 0),
+        habit.description ?? '',
+        Number(habit.frequency?.denominator ?? 1),
+        Number(habit.frequency?.numerator ?? 1),
+        0,
+        habit.name ?? '',
+        Number(habit.position ?? index),
+        null,
+        null,
+        127,
+        isNumerical ? 1 : 0,
+        isNumerical ? (habit.targetType === NumericalHabitType.AT_MOST ? 1 : 0) : 0,
+        isNumerical ? Number(habit.targetValue ?? 0) : 0,
+        isNumerical ? (habit.unit ?? '') : '',
+        habit.question ?? '',
+        habit.uuid ?? (habit.id ?? `habit-${index}`),
+      ],
+    )
+  })
+
+  ordered.forEach((habit) => {
+    const habitId = habitIds.get(habit.id ?? habit.uuid)
+    if (!habitId) return
+
+    ;[...(habit.entries ?? [])]
+      .filter((entry) => entry && entry.date && entry.value !== UNKNOWN && entry.value !== null)
+      .sort((a, b) => dateKeyToTimestamp(a.date) - dateKeyToTimestamp(b.date))
+      .forEach((entry) => {
+        database.run(
+          'INSERT INTO Repetitions (habit, timestamp, value, notes) VALUES (?, ?, ?, ?);',
+          [habitId, dateKeyToTimestamp(entry.date), valueToLoopDb(entry.value), entry.notes ?? ''],
+        )
+      })
+  })
+
+  return database
+}
+
+export async function exportLoopDbArchive(habits) {
+  const database = await exportLoopDbDatabase(habits)
+  try {
+    return database.export()
+  } finally {
+    database.close()
+  }
+}
+
 export async function importLoopDbArchive(bytes) {
   const SQL = await initSqlJs({
-    locateFile: () => '/sql-wasm.wasm',
+    locateFile: () => sqlWasmUrl(),
   })
   const database = new SQL.Database(new Uint8Array(bytes))
   try {

@@ -129,13 +129,20 @@ export function Header({
                 role="menuitem"
                 onClick={() => {
                   setMenuOpen(false)
-                  onExport()
+                  onExport('csv')
                 }}
               >
                 CSV
               </button>
-              <button type="button" role="menuitem" disabled>
-                DB <span>Coming soon</span>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setMenuOpen(false)
+                  onExport('db')
+                }}
+              >
+                DB
               </button>
             </div>
           ) : null}

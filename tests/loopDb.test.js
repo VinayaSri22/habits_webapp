@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import initSqlJs from 'sql.js'
-import { importLoopDbDatabase, timestampToDateKey } from '../src/utils/loopDb.js'
+import { createHabit } from '../src/models/Habit.js'
+import { exportLoopDbDatabase, importLoopDbDatabase, timestampToDateKey } from '../src/utils/loopDb.js'
 
 const SQL = await initSqlJs({
   locateFile: (file) => new URL(`../node_modules/sql.js/dist/${file}`, import.meta.url).href,
@@ -95,4 +96,33 @@ test('importLoopDbDatabase converts Loop Habits tables into app habits and entri
     ],
   )
   assert.equal(habits[0].colorIndex, 11)
+})
+
+test('exportLoopDbDatabase writes a Loop-compatible Habits and Repetitions schema', async () => {
+  const db = await exportLoopDbDatabase([
+    createHabit({
+      id: 'habit-9',
+      name: 'Brush and floss',
+      description: '',
+      question: 'Did you brush?',
+      colorIndex: 11,
+      type: 'YES_NO',
+      frequency: { numerator: 1, denominator: 1 },
+      isArchived: false,
+      position: 0,
+      entries: [
+        { date: '2024-10-12', value: 2, notes: '' },
+        { date: '2024-10-13', value: 0, notes: '' },
+      ],
+    }),
+  ])
+
+  const habits = db.exec('SELECT id, name, type, color, position, question FROM Habits')
+  const repetitions = db.exec('SELECT habit, timestamp, value, notes FROM Repetitions ORDER BY timestamp')
+
+  assert.equal(habits[0].values.length, 1)
+  assert.equal(habits[0].values[0][1], 'Brush and floss')
+  assert.equal(repetitions[0].values.length, 2)
+  assert.equal(repetitions[0].values[0][2], 2)
+  assert.equal(repetitions[0].values[1][2], 0)
 })

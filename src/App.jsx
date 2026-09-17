@@ -6,8 +6,8 @@ import { HabitForm } from './components/HabitForm/HabitForm.jsx'
 import { HabitList } from './components/HabitList/HabitList.jsx'
 import { HabitProvider, useHabits } from './store/HabitStore.js'
 import { HABIT_COLORS } from './utils/colors.js'
-import { downloadZip, exportLoopCsvArchive, importLoopCsvArchive } from './utils/loopCsv.js'
-import { importLoopDbArchive } from './utils/loopDb.js'
+import { downloadBlob, downloadZip, exportLoopCsvArchive, importLoopCsvArchive } from './utils/loopCsv.js'
+import { exportLoopDbArchive, importLoopDbArchive } from './utils/loopDb.js'
 import { todayKey } from './utils/dateUtils.js'
 import './components/common/Modal.css'
 import './App.css'
@@ -75,7 +75,18 @@ function AppShell() {
     }
   }
 
-  function handleExport() {
+  async function handleExport(format = 'csv') {
+    if (format === 'db') {
+      try {
+        const bytes = await exportLoopDbArchive(habits)
+        downloadBlob(`Loop Habits Backup ${todayKey()}.db`, bytes, 'application/octet-stream')
+        setStatus('Exported Loop DB backup.')
+      } catch (error) {
+        setStatus(error instanceof Error ? error.message : 'Could not export DB backup.')
+      }
+      return
+    }
+
     const bytes = exportLoopCsvArchive(habits)
     downloadZip(`Loop Habits CSV ${todayKey()}.zip`, bytes)
     setStatus('Exported Loop CSV zip.')
