@@ -165,10 +165,10 @@ npm run build
 - [x] Day-of-week frequency chart
 
 ### Phase 4 — Polish
-- [ ] Dark mode / Light mode toggle
-- [ ] Archive/Unarchive habits
+- [x] Dark mode / Light mode toggle
+- [x] Archive/Unarchive habits
 - [x] CSV data export & import (matching Loop's format)
-- [ ] Responsive mobile layout
+- [x] Responsive mobile layout
 - [ ] PWA manifest & service worker
 
 ---

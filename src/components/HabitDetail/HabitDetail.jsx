@@ -23,7 +23,7 @@ const RANGES = [
   { id: 0, label: 'All' },
 ]
 
-export function HabitDetail({ habit, onBack, onEdit, onToggle, onSetEntry }) {
+export function HabitDetail({ habit, onBack, onEdit, onToggle, onSetEntry, onArchive, onUnarchive }) {
   const snapshot = getHabitSnapshot(habit)
   const color = getHabitColor(habit.colorIndex).hex
   const today = todayKey()
@@ -55,9 +55,20 @@ export function HabitDetail({ habit, onBack, onEdit, onToggle, onSetEntry }) {
         <button type="button" className="btn btn-ghost" onClick={onBack}>
           ← Habits
         </button>
-        <button type="button" className="btn btn-primary" onClick={onEdit}>
-          Edit
-        </button>
+        <div className="detail-actions">
+          {habit.isArchived ? (
+            <button type="button" className="btn btn-ghost" onClick={() => onUnarchive(habit.id)}>
+              Unarchive
+            </button>
+          ) : (
+            <button type="button" className="btn btn-ghost" onClick={() => onArchive(habit.id)}>
+              Archive
+            </button>
+          )}
+          <button type="button" className="btn btn-primary" onClick={onEdit}>
+            Edit
+          </button>
+        </div>
       </div>
 
       <header className="detail-hero">
@@ -69,6 +80,7 @@ export function HabitDetail({ habit, onBack, onEdit, onToggle, onSetEntry }) {
             {isNumerical ? ` · ${habit.targetValue}${habit.unit ? ` ${habit.unit}` : ''}` : ''}
           </p>
           {habit.question ? <p className="detail-question">{habit.question}</p> : null}
+          {habit.isArchived ? <p className="archive-badge">Archived</p> : null}
         </div>
         <div className="detail-score" style={{ color, background: `${color}22` }}>
           {snapshot.scorePercent}%

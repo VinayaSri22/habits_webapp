@@ -304,8 +304,8 @@ function writeCombinedScores(habits, snapshots, oldest, today) {
   return out
 }
 
-export function downloadZip(filename, bytes) {
-  const blob = new Blob([bytes], { type: 'application/zip' })
+export function downloadBlob(filename, bytes, type = 'application/octet-stream') {
+  const blob = new Blob([bytes], { type })
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
@@ -314,4 +314,8 @@ export function downloadZip(filename, bytes) {
   link.click()
   link.remove()
   URL.revokeObjectURL(url)
+}
+
+export function downloadZip(filename, bytes) {
+  downloadBlob(filename, bytes, 'application/zip')
 }

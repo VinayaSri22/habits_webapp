@@ -78,6 +78,29 @@
   font-weight: var(--weight-semibold);
 }
 
+.habit-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+}
+
+.archive-button {
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  border-radius: var(--radius-sm);
+  padding: 0.35rem 0.4rem;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+}
+
+.archive-button:hover,
+.archive-button:focus-visible {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
 .habit-move {
   display: flex;
   flex-direction: column;
@@ -93,4 +116,37 @@
 .habit-move .icon-button:disabled {
   opacity: 0.35;
   cursor: default;
+}
+
+@media (max-width: 760px) {
+  .habit-actions {
+    flex-direction: column;
+  }
+
+  .archive-button {
+    padding: 0.15rem 0.25rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .habit-card {
+    padding-inline: 0.3rem;
+  }
+
+  .check-button {
+    width: 32px;
+    height: 32px;
+  }
+
+  .archive-button {
+    font-size: 0;
+    width: 28px;
+    height: 18px;
+    padding: 0;
+  }
+
+  .archive-button::before {
+    content: 'A';
+    font-size: var(--text-xs);
+  }
 }

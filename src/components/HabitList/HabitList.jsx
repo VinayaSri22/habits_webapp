@@ -7,13 +7,25 @@ import './HabitList.css'
 
 const VISIBLE_DAYS = 7
 
-export function HabitList({ habits, onToggle, onSetEntry, onOpen, onReorder }) {
+export function HabitList({
+  habits,
+  archivedHabits = [],
+  showArchived,
+  onToggle,
+  onSetEntry,
+  onOpen,
+  onReorder,
+  onArchive,
+  onUnarchive,
+  onToggleArchived,
+}) {
   const dates = dateRangeEndingOn(VISIBLE_DAYS)
   const [dragId, setDragId] = useState(null)
   const [numberTarget, setNumberTarget] = useState(null)
 
-  const ordered = habits
-    .filter((habit) => !habit.isArchived)
+  const ordered = habits.filter((habit) => !habit.isArchived).sort((a, b) => a.position - b.position)
+  const orderedArchived = archivedHabits
+    .filter((habit) => habit.isArchived)
     .sort((a, b) => a.position - b.position)
 
   function move(fromIndex, toIndex) {
@@ -53,7 +65,7 @@ export function HabitList({ habits, onToggle, onSetEntry, onOpen, onReorder }) {
           return (
             <div
               key={date}
-              className={`day-slot day-heading${isToday ? ' today' : ''}${index < 2 ? ' is-optional' : ''}`}
+              className={`day-slot day-heading${isToday ? ' today' : ''}${index < 2 ? ' is-optional' : ''}${index < 4 ? ' is-mobile-optional' : ''}`}
             >
               <span>{heading.weekday}</span>
               <strong>{heading.day}</strong>
@@ -62,6 +74,13 @@ export function HabitList({ habits, onToggle, onSetEntry, onOpen, onReorder }) {
         })}
         <span />
       </div>
+
+      {ordered.length === 0 ? (
+        <div className="list-empty">
+          <strong>No active habits</strong>
+          <span>Unarchive a habit or create a new one to keep tracking.</span>
+        </div>
+      ) : null}
 
       {ordered.map((habit, index) => (
         <HabitCard
@@ -76,6 +95,7 @@ export function HabitList({ habits, onToggle, onSetEntry, onOpen, onReorder }) {
           onOpen={() => onOpen(habit)}
           onMoveUp={() => move(index, index - 1)}
           onMoveDown={() => move(index, index + 1)}
+          onArchive={() => onArchive(habit.id)}
           onDragStart={(event) => {
             setDragId(habit.id)
             event.dataTransfer.effectAllowed = 'move'
@@ -83,6 +103,33 @@ export function HabitList({ habits, onToggle, onSetEntry, onOpen, onReorder }) {
           }}
         />
       ))}
+
+      {orderedArchived.length > 0 ? (
+        <section className="archive-section" aria-label="Archived habits">
+          <button type="button" className="archive-toggle" onClick={onToggleArchived}>
+            <span>{showArchived ? 'Hide archived' : 'Show archived'}</span>
+            <strong>{orderedArchived.length}</strong>
+          </button>
+          {showArchived ? (
+            <div className="archived-list">
+              {orderedArchived.map((habit) => {
+                const snapshot = getHabitSnapshot(habit)
+                return (
+                  <article key={habit.id} className="archived-row">
+                    <button type="button" className="archived-name" onClick={() => onOpen(habit)}>
+                      {habit.name}
+                    </button>
+                    <span>{snapshot.scorePercent}%</span>
+                    <button type="button" className="btn btn-ghost" onClick={() => onUnarchive(habit.id)}>
+                      Unarchive
+                    </button>
+                  </article>
+                )
+              })}
+            </div>
+          ) : null}
+        </section>
+      ) : null}
 
       <NumberEntryModal
         open={Boolean(numberTarget)}

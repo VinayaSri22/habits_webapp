@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef } from 'react'
 import './Modal.css'
 
-export function Modal({ title, open, onClose, children, footer }) {
+export function Modal({ title, open, onClose, children, footer, className = '' }) {
   const titleId = useId()
   const dialogRef = useRef(null)
 
@@ -34,7 +34,7 @@ export function Modal({ title, open, onClose, children, footer }) {
   if (!open) return null
 
   return (
-    <div className="modal-overlay" onMouseDown={onClose}>
+    <div className={`modal-overlay${className ? ` ${className}` : ''}`} onMouseDown={onClose}>
       <div
         className="modal"
         role="dialog"
