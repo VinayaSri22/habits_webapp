@@ -50,3 +50,21 @@ export function isLastDayOfMonth(dateKey) {
   const date = parseDateKey(dateKey)
   return date.getDate() === monthLength(dateKey)
 }
+
+/** Oldest → newest, inclusive of `endKey` (defaults to today). */
+export function dateRangeEndingOn(count, endKey = todayKey()) {
+  return Array.from({ length: count }, (_, index) => addDays(endKey, index - count + 1))
+}
+
+export function formatDayHeading(dateKey) {
+  const date = parseDateKey(dateKey)
+  return {
+    weekday: date.toLocaleDateString(undefined, { weekday: 'narrow' }),
+    day: String(date.getDate()),
+    full: date.toLocaleDateString(undefined, {
+      weekday: 'long',
+      month: 'short',
+      day: 'numeric',
+    }),
+  }
+}

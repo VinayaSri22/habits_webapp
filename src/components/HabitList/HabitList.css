@@ -1,0 +1,68 @@
+.habit-list {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.habit-grid {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1.4fr) 3.4rem repeat(7, 2.35rem) 28px;
+  align-items: center;
+  column-gap: 2px;
+}
+
+.habit-list-header {
+  padding: 0 0.4rem 0.35rem;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.habit-list-title {
+  font-weight: var(--weight-medium);
+}
+
+.score-heading {
+  text-align: center;
+}
+
+.day-slot {
+  text-align: center;
+}
+
+.day-heading {
+  display: grid;
+  justify-items: center;
+  line-height: 1.15;
+}
+
+.day-heading.today strong {
+  color: var(--color-accent);
+}
+
+.score-pill {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  border-radius: var(--radius-pill);
+  padding: 0.28rem 0;
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .habit-grid {
+    grid-template-columns: 24px minmax(0, 1.2fr) 2.8rem repeat(5, 2.1rem) 24px;
+  }
+
+  .day-slot.is-optional {
+    display: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .habit-grid {
+    grid-template-columns: minmax(0, 1fr) 2.6rem repeat(5, 2rem) 24px;
+  }
+
+  .habit-grid > .drag-handle,
+  .habit-list-header > :first-child {
+    display: none;
+  }
+}

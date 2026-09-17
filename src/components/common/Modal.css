@@ -1,0 +1,156 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--color-overlay);
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  z-index: 40;
+}
+
+.modal {
+  width: min(440px, 100%);
+  max-height: min(90svh, 720px);
+  overflow: auto;
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--color-shadow);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header,
+.modal-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.modal-header {
+  justify-content: space-between;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.modal-header h2 {
+  font-size: var(--text-lg);
+}
+
+.modal-body {
+  padding: var(--space-4);
+  display: grid;
+  gap: var(--space-4);
+}
+
+.modal-footer {
+  justify-content: flex-end;
+  border-top: 1px solid var(--color-border);
+  flex-wrap: wrap;
+}
+
+.icon-button {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.icon-button:hover,
+.icon-button:focus-visible {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
+.btn {
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 0.9rem;
+  font-weight: var(--weight-medium);
+  font-size: var(--text-sm);
+}
+
+.btn-primary {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.btn-primary:hover,
+.btn-primary:focus-visible {
+  background: var(--color-accent-hover);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+.btn-danger {
+  background: transparent;
+  color: var(--danger);
+  margin-right: auto;
+}
+
+.field {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.field span,
+.field-label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-text);
+  padding: 0.6rem 0.75rem;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.segmented {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+}
+
+.segmented button {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  border-radius: var(--radius-pill);
+  padding: 0.45rem 0.6rem;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.segmented button[aria-pressed='true'] {
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--color-shadow);
+}
+
+.number-question {
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-3);
+}

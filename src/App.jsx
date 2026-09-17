@@ -1,82 +1,88 @@
-import { HABIT_COLORS } from './utils/colors.js'
-import { getHabitSnapshot } from './models/Habit.js'
+import { useCallback, useState } from 'react'
+import { Header } from './components/Header/Header.jsx'
+import { HabitForm } from './components/HabitForm/HabitForm.jsx'
+import { HabitList } from './components/HabitList/HabitList.jsx'
 import { HabitProvider, useHabits } from './store/HabitStore.js'
+import { HABIT_COLORS } from './utils/colors.js'
+import './components/common/Modal.css'
 import './App.css'
 
-const THEME_CHOICES = [
-  { id: 'system', label: 'System' },
-  { id: 'light', label: 'Light' },
-  { id: 'dark', label: 'Dark' },
-]
-
 function AppShell() {
-  const { habits, settings, setTheme } = useHabits()
+  const { habits, settings, setTheme, addHabit, updateHabit, deleteHabit, toggleEntry, setEntry, reorderHabits } =
+    useHabits()
+  const [formOpen, setFormOpen] = useState(false)
+  const [editingHabit, setEditingHabit] = useState(null)
+
+  const closeForm = useCallback(() => {
+    setFormOpen(false)
+    setEditingHabit(null)
+  }, [])
+
+  const visibleHabits = habits.filter((habit) => !habit.isArchived)
 
   return (
     <div className="app">
-      <header className="app-header">
-        <div className="brand">
-          <div className="brand-mark" aria-hidden="true">
-            L
-          </div>
-          <div>
-            <h1>Loop Habits</h1>
-            <p>Private, local habit tracking</p>
-          </div>
-        </div>
-        <div className="theme-switch" role="group" aria-label="Color theme">
-          {THEME_CHOICES.map((choice) => (
-            <button
-              key={choice.id}
-              type="button"
-              aria-pressed={settings.theme === choice.id}
-              onClick={() => setTheme(choice.id)}
-            >
-              {choice.label}
-            </button>
-          ))}
-        </div>
-      </header>
+      <Header
+        theme={settings.theme}
+        onThemeChange={setTheme}
+        onAddHabit={() => {
+          setEditingHabit(null)
+          setFormOpen(true)
+        }}
+      />
 
       <main className="app-main">
-        {habits.length === 0 ? (
+        {visibleHabits.length === 0 ? (
           <section className="empty-state">
             <h2>No habits yet</h2>
-            <p>
-              Your habits stay on this device. Check-ins, scores, and streaks will
-              appear here once you add your first habit.
-            </p>
-            <div className="palette" aria-label="Habit color palette">
+            <p>Create a habit, then tap the last few days to check in. Everything stays on this device.</p>
+            <div className="palette" aria-hidden="true">
               {HABIT_COLORS.map((color) => (
-                <span
-                  key={color.index}
-                  className="swatch"
-                  title={color.name}
-                  style={{ background: color.hex }}
-                />
+                <span key={color.index} className="swatch" style={{ background: color.hex }} />
               ))}
             </div>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => {
+                setEditingHabit(null)
+                setFormOpen(true)
+              }}
+            >
+              Add your first habit
+            </button>
           </section>
         ) : (
-          <section className="habit-preview">
-            {habits
-              .filter((habit) => !habit.isArchived)
-              .sort((a, b) => a.position - b.position)
-              .map((habit) => {
-                const snapshot = getHabitSnapshot(habit)
-                return (
-                  <article key={habit.id} className="habit-row">
-                    <div>
-                      <strong>{habit.name}</strong>
-                      <span>{snapshot.isCompletedToday ? 'Completed today' : 'Not completed today'}</span>
-                    </div>
-                    <div className="score-pill">{snapshot.scorePercent}%</div>
-                  </article>
-                )
-              })}
-          </section>
+          <HabitList
+            habits={habits}
+            onToggle={toggleEntry}
+            onSetEntry={setEntry}
+            onEdit={(habit) => {
+              setEditingHabit(habit)
+              setFormOpen(true)
+            }}
+            onReorder={reorderHabits}
+          />
         )}
       </main>
+
+      <HabitForm
+        open={formOpen}
+        habit={editingHabit}
+        onClose={closeForm}
+        onSave={(payload) => {
+          if (editingHabit) {
+            updateHabit(editingHabit.id, payload)
+          } else {
+            addHabit(payload)
+          }
+          closeForm()
+        }}
+        onDelete={(id) => {
+          deleteHabit(id)
+          closeForm()
+        }}
+      />
     </div>
   )
 }

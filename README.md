@@ -150,12 +150,12 @@ npm run build
 - [x] Data models (Habit, Entry, Score, Streak, Frequency)
 - [x] localStorage persistence layer
 
-### Phase 2 — Core Tracker
-- [ ] Main habit list view with inline checkmark toggles
-- [ ] Create/Edit habit modal (name, color, frequency, type)
-- [ ] Toggle habit entries (yes/no/skip cycle)
-- [ ] Numerical habit value entry
-- [ ] Habit reordering (drag or manual)
+### Phase 2 — Core Tracker ✅
+- [x] Main habit list view with inline checkmark toggles
+- [x] Create/Edit habit modal (name, color, frequency, type)
+- [x] Toggle habit entries (yes/no/skip cycle)
+- [x] Numerical habit value entry
+- [x] Habit reordering (drag or manual)
 
 ### Phase 3 — Analytics
 - [ ] Habit detail view
