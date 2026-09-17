@@ -113,8 +113,15 @@ export function Header({
               >
                 CSV
               </button>
-              <button type="button" role="menuitem" disabled>
-                DB <span>Coming soon</span>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setMenuOpen(false)
+                  fileRef.current?.click()
+                }}
+              >
+                DB
               </button>
               <p>Export</p>
               <button
@@ -136,7 +143,7 @@ export function Header({
         <input
           ref={fileRef}
           type="file"
-          accept=".zip,application/zip"
+          accept=".zip,application/zip,.db,.sqlite,.sqlite3,.db3"
           hidden
           onChange={(event) => {
             const file = event.target.files?.[0]

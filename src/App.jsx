@@ -7,6 +7,7 @@ import { HabitList } from './components/HabitList/HabitList.jsx'
 import { HabitProvider, useHabits } from './store/HabitStore.js'
 import { HABIT_COLORS } from './utils/colors.js'
 import { downloadZip, exportLoopCsvArchive, importLoopCsvArchive } from './utils/loopCsv.js'
+import { importLoopDbArchive } from './utils/loopDb.js'
 import { todayKey } from './utils/dateUtils.js'
 import './components/common/Modal.css'
 import './App.css'
@@ -54,7 +55,8 @@ function AppShell() {
   async function handleImportFile(file, { forceReplace = false } = {}) {
     try {
       const bytes = new Uint8Array(await file.arrayBuffer())
-      const imported = importLoopCsvArchive(bytes)
+      const isSqlite = /\.(db|sqlite|sqlite3|db3)$/i.test(file.name)
+      const imported = isSqlite ? await importLoopDbArchive(bytes) : importLoopCsvArchive(bytes)
       if (imported.length === 0) {
         setStatus('No habits found in that file.')
         return
