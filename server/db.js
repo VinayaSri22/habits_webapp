@@ -2,8 +2,11 @@ import pg from 'pg'
 
 const { Pool } = pg
 
+const connectionString =
+  process.env.DATABASE_URL || 'postgresql://habits:habits_dev@localhost:5432/habits_local'
+
 export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgresql://habits:habits_dev@localhost:5432/habits_local',
+  connectionString,
   ssl: false,
 })
 
