@@ -97,11 +97,22 @@ export function HabitCard({
         ⋮⋮
       </button>
 
-      <div className="habit-meta">
-        <button type="button" className="habit-name" onClick={onOpen}>
+      <div
+        className="habit-meta habit-meta-clickable"
+        role="button"
+        tabIndex={0}
+        onClick={onOpen}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault()
+            onOpen()
+          }
+        }}
+      >
+        <span className="habit-name">
           <span className="habit-pip" style={{ background: color }} />
           {habit.name}
-        </button>
+        </span>
         <p>
           {describeFrequency(habit.frequency)}
           {isNumerical ? ` · ${habit.targetValue}${habit.unit ? ` ${habit.unit}` : ''}` : ''}

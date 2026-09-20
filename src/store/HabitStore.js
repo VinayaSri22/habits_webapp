@@ -1,11 +1,26 @@
-import { createContext, createElement, useContext, useEffect, useMemo, useReducer } from 'react'
+import { createContext, createElement, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { createHabit, cycleYesNoEntry, setHabitEntry } from '../models/Habit.js'
-import { applyTheme, loadAppData, saveAppData } from '../utils/storage.js'
+import { applyTheme, defaultAppData } from '../utils/storage.js'
 
 const HabitContext = createContext(null)
 
 function nextPosition(habits) {
   return habits.reduce((max, habit) => Math.max(max, habit.position), -1) + 1
+}
+
+function ensureUniqueHabitIds(habits, existingIds = []) {
+  const seen = new Set(existingIds)
+  return habits.map((habit) => {
+    const candidate = habit.id
+    if (candidate !== undefined && candidate !== null && !seen.has(candidate)) {
+      seen.add(candidate)
+      return habit
+    }
+
+    const nextId = crypto.randomUUID()
+    seen.add(nextId)
+    return { ...habit, id: nextId }
+  })
 }
 
 function reducer(state, action) {
@@ -71,6 +86,9 @@ function reducer(state, action) {
     case 'PATCH_SETTINGS': {
       return { ...state, settings: { ...state.settings, ...action.patch } }
     }
+    case 'LOAD_HABITS': {
+      return { ...state, habits: ensureUniqueHabitIds(action.habits, state.habits.map((habit) => habit.id)) }
+    }
     case 'ARCHIVE_HABIT': {
       return {
         ...state,
@@ -80,14 +98,16 @@ function reducer(state, action) {
       }
     }
     case 'REPLACE_HABITS': {
-      return { ...state, habits: action.habits }
+      return { ...state, habits: ensureUniqueHabitIds(action.habits) }
     }
     case 'MERGE_HABITS': {
       const offset = nextPosition(state.habits)
-      const incoming = action.habits.map((habit, index) => ({
-        ...habit,
-        position: offset + index,
-      }))
+      const incoming = ensureUniqueHabitIds(action.habits, state.habits.map((habit) => habit.id)).map(
+        (habit, index) => ({
+          ...habit,
+          position: offset + index,
+        }),
+      )
       return { ...state, habits: [...state.habits, ...incoming] }
     }
     default:
@@ -96,12 +116,101 @@ function reducer(state, action) {
 }
 
 export function HabitProvider({ children }) {
-  const [state, dispatch] = useReducer(reducer, null, loadAppData)
+  const [state, dispatch] = useReducer(reducer, defaultAppData())
+  const [hydrated, setHydrated] = useState(false)
+  const persistHabitsTimer = useRef(null)
+  const persistSettingsTimer = useRef(null)
+
+  useEffect(() => {
+    let ignore = false
+
+    Promise.all([
+      fetch('/api/habits').then((response) => {
+        if (!response.ok) throw new Error('Could not load habits from the database')
+        return response.json()
+      }),
+      fetch('/api/settings').then((response) => {
+        if (!response.ok) throw new Error('Could not load settings from the database')
+        return response.json()
+      }),
+    ])
+      .then(([habitData, settingsData]) => {
+        if (ignore) return
+        dispatch({
+          type: 'LOAD_HABITS',
+          habits: ensureUniqueHabitIds(habitData.habits ?? []),
+        })
+        dispatch({
+          type: 'PATCH_SETTINGS',
+          patch: {
+            ...defaultAppData().settings,
+            ...(settingsData.settings ?? {}),
+          },
+        })
+        setHydrated(true)
+      })
+      .catch(() => {
+        if (!ignore) {
+          setHydrated(true)
+        }
+      })
+
+    return () => {
+      ignore = true
+    }
+  }, [])
 
   useEffect(() => {
     applyTheme(state.settings.theme)
-    saveAppData(state)
-  }, [state])
+  }, [state.settings.theme])
+
+  useEffect(() => {
+    if (!hydrated) return undefined
+
+    if (persistHabitsTimer.current) {
+      clearTimeout(persistHabitsTimer.current)
+    }
+
+    persistHabitsTimer.current = setTimeout(() => {
+      fetch('/api/habits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ habits: state.habits }),
+      }).catch((error) => {
+        console.error('Failed to persist habits to the database', error)
+      })
+    }, 150)
+
+    return () => {
+      if (persistHabitsTimer.current) {
+        clearTimeout(persistHabitsTimer.current)
+      }
+    }
+  }, [hydrated, state.habits])
+
+  useEffect(() => {
+    if (!hydrated) return undefined
+
+    if (persistSettingsTimer.current) {
+      clearTimeout(persistSettingsTimer.current)
+    }
+
+    persistSettingsTimer.current = setTimeout(() => {
+      fetch('/api/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(state.settings),
+      }).catch((error) => {
+        console.error('Failed to persist settings to the database', error)
+      })
+    }, 150)
+
+    return () => {
+      if (persistSettingsTimer.current) {
+        clearTimeout(persistSettingsTimer.current)
+      }
+    }
+  }, [hydrated, state.settings])
 
   const value = useMemo(
     () => ({

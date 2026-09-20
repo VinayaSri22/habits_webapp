@@ -22,6 +22,22 @@
   min-width: 0;
 }
 
+.habit-meta-clickable {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 36px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  padding: 0.15rem 0.2rem;
+}
+
+.habit-meta-clickable:hover,
+.habit-meta-clickable:focus-visible {
+  background: var(--color-surface-hover);
+  outline: none;
+}
+
 .habit-name {
   display: flex;
   align-items: center;
