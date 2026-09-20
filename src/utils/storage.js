@@ -1,6 +1,9 @@
 const STORAGE_KEY = 'loop-habits:v1'
 const APP_VERSION = 1
 
+// Legacy browser storage helpers remain only for compatibility with older UI defaults.
+// The real application data lives in Postgres and is persisted through the API at
+// /api/habits and /api/settings. This module is not the source of truth for habits.
 export const THEME_OPTIONS = ['light', 'dark']
 
 export function defaultAppData() {
@@ -16,6 +19,8 @@ export function defaultAppData() {
 }
 
 export function loadAppData() {
+  // Kept only for backwards-compatibility with old browser-local data. Habit data is no
+  // longer considered authoritative here; the database is the source of truth.
   if (typeof localStorage === 'undefined') return defaultAppData()
 
   try {

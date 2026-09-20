@@ -1,11 +1,17 @@
 import cors from 'cors'
 import express from 'express'
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { query } from './db.js'
 import { normalizeHabitForDb, normalizeHabitFromDb } from './habitsService.js'
 
 const app = express()
 const port = process.env.PORT || 3001
 const JSON_LIMIT = process.env.JSON_BODY_LIMIT || '50mb'
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const projectRoot = path.resolve(__dirname, '..')
+const distFolder = path.join(projectRoot, 'dist')
 
 app.use(cors())
 app.use(express.json({ limit: JSON_LIMIT }))
@@ -130,6 +136,14 @@ app.post('/api/habits', async (req, res) => {
     res.status(500).json({ error: error.message })
   }
 })
+
+if (fs.existsSync(distFolder)) {
+  app.use(express.static(distFolder))
+
+  app.get(/^(?!\/api\/).*/, (_req, res) => {
+    res.sendFile(path.join(distFolder, 'index.html'))
+  })
+}
 
 app.listen(port, () => {
   console.log(`Habits API listening on http://localhost:${port}`)
